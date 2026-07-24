@@ -26,7 +26,8 @@ tcc-platform-database/
 │   ├── 002_create_projects_table.sql
 │   ├── 003_create_deliveries_table.sql
 │   ├── 004_create_feedbacks_table.sql
-│   └── 005_create_notifications_table.sql
+│   ├── 005_create_notifications_table.sql
+│   └── 006_create_milestones_table.sql
 └── seeds/                  # Dados de desenvolvimento
     └── dev_data.sql
 ```
@@ -40,47 +41,41 @@ tcc-platform-database/
 │     USERS       │       │    PROJECTS     │       │   DELIVERIES    │
 ├─────────────────┤       ├─────────────────┤       ├─────────────────┤
 │ id (PK)         │       │ id (PK)         │       │ id (PK)         │
-│ name            │       │ title           │       │ project_id (FK) │──┐
-│ email (UNIQUE)  │       │ description     │       │ title           │  │
-│ password_hash   │       │ status          │       │ description     │  │
-│ user_type       │       │ start_date      │       │ deadline        │  │
-│ is_active       │       │ expected_date   │       │ status          │  │
-│ created_at      │       │ student_id (FK) │──┐    │ file_url        │  │
-│ updated_at      │       │ advisor_id (FK) │──┤    │ submitted_at    │  │
-└────────┬────────┘       │ created_at      │  │    │ created_at      │  │
-         │                │ updated_at      │  │    │ updated_at      │  │
-         │                └────────┬────────┘  │    └────────┬────────┘  │
-         │                         │           │             │           │
-         │    ┌────────────────────┘           │             │           │
-         │    │                                │             │           │
-         │    │    ┌───────────────────────────┘             │           │
-         │    │    │                                         │           │
-         │    ▼    ▼                                         ▼           │
-         │  student_id                               ┌───────────────┐   │
-         │  advisor_id                               │   FEEDBACKS   │   │
-         │                                           ├───────────────┤   │
-         │                                           │ id (PK)       │   │
-         │                                           │ delivery_id   │───┘
-         │                                           │ advisor_id    │──┐
-         │                                           │ comment       │  │
-         │                                           │ grade         │  │
-         │                                           │ created_at    │  │
-         │                                           └───────────────┘  │
-         │                                                              │
-         │    ┌─────────────────────────────────────────────────────────┘
-         │    │
-         │    │    ┌─────────────────┐
-         │    │    │  NOTIFICATIONS  │
-         │    │    ├─────────────────┤
-         │    │    │ id (PK)         │
-         └────┼───▶│ user_id (FK)    │
-              │    │ message         │
-              │    │ is_read         │
-              │    │ created_at      │
-              │    └─────────────────┘
-              │
-              └── (advisor_id nas tabelas projects e feedbacks)
+│ name            │       │ title           │       │ project_id (FK) │
+│ email (UNIQUE)  │       │ description     │       │ title           │
+│ password_hash   │       │ status          │       │ description     │
+│ user_type       │       │ start_date      │       │ deadline        │
+│ is_active       │       │ expected_date   │       │ status          │
+│ created_at      │       │ student_id (FK) │       │ file_url        │
+│ updated_at      │       │ advisor_id (FK) │       │ submitted_at    │
+└─────────────────┘       │ created_at      │       │ created_at      │
+                           │ updated_at      │       │ updated_at      │
+                           └─────────────────┘       └─────────────────┘
+
+┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
+│   FEEDBACKS     │       │   MILESTONES    │       │  NOTIFICATIONS  │
+├─────────────────┤       ├─────────────────┤       ├─────────────────┤
+│ id (PK)         │       │ id (PK)         │       │ id (PK)         │
+│ delivery_id (FK)│       │ project_id (FK) │       │ user_id (FK)    │
+│ advisor_id (FK) │       │ title           │       │ type            │
+│ comment         │       │ description     │       │ message         │
+│ grade           │       │ due_date        │       │ project_id (FK) │
+│ created_at      │       │ status          │       │ is_read         │
+└─────────────────┘       │ created_at      │       │ created_at      │
+                           │ updated_at      │       │ updated_at      │
+                           └─────────────────┘       └─────────────────┘
 ```
+
+**Relacionamentos (FKs):**
+
+- `projects.student_id` → `users.id`
+- `projects.advisor_id` → `users.id` (opcional)
+- `deliveries.project_id` → `projects.id`
+- `feedbacks.delivery_id` → `deliveries.id`
+- `feedbacks.advisor_id` → `users.id`
+- `milestones.project_id` → `projects.id`
+- `notifications.user_id` → `users.id`
+- `notifications.project_id` → `projects.id` (opcional)
 
 ### Tabelas
 
@@ -110,9 +105,14 @@ Projetos de TCC/trabalhos acadêmicos.
 | start_date | DATE | Data de início |
 | expected_delivery_date | DATE | Previsão de entrega |
 | student_id | INTEGER | Referência ao aluno (FK) |
-| advisor_id | INTEGER | Referência ao orientador (FK) |
+| advisor_id | INTEGER | Referência ao orientador (FK, opcional) |
 | created_at | TIMESTAMPTZ | Data de criação |
 | updated_at | TIMESTAMPTZ | Data de atualização |
+
+> `advisor_id` é nullable no banco: a obrigatoriedade de um projeto ter orientador
+> é regra de negócio validada na camada de serviço do backend (mesmo padrão da
+> regra de "1 projeto `in_progress` por aluno" descrita abaixo), não uma
+> constraint SQL.
 
 #### deliveries
 Entregas/marcos do projeto.
@@ -149,9 +149,26 @@ Notificações/alertas para os usuários.
 |--------|------|-----------|
 | id | SERIAL | Identificador único |
 | user_id | INTEGER | Referência ao usuário (FK) |
+| type | ENUM | Tipo: `delivery_created`, `feedback_registered`, `milestone_created`, `milestone_updated` |
 | message | TEXT | Mensagem da notificação |
+| project_id | INTEGER | Referência ao projeto (FK, opcional) |
 | is_read | BOOLEAN | Flag de leitura |
 | created_at | TIMESTAMPTZ | Data de criação |
+| updated_at | TIMESTAMPTZ | Data de atualização |
+
+#### milestones
+Marcos/etapas intermediárias do projeto.
+
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | SERIAL | Identificador único |
+| project_id | INTEGER | Referência ao projeto (FK) |
+| title | VARCHAR(255) | Título do marco |
+| description | TEXT | Descrição do marco |
+| due_date | TIMESTAMPTZ | Prazo previsto |
+| status | ENUM | Status: `pending`, `completed` |
+| created_at | TIMESTAMPTZ | Data de criação |
+| updated_at | TIMESTAMPTZ | Data de atualização |
 
 ### Regras de Negócio Importantes
 
@@ -300,7 +317,8 @@ O seed `dev_data.sql` popula o banco com os seguintes dados:
 - 1 projeto com status `completed`
 - Diversas entregas em diferentes estados
 - Feedbacks de orientadores
-- Notificações de exemplo
+- Marcos (milestones) em diferentes status
+- Notificações de exemplo (delivery_created, feedback_registered, milestone_created, milestone_updated)
 
 ## Estrutura das Migrations
 
@@ -315,7 +333,8 @@ As migrations são executadas em ordem numérica:
 
 2. **002_create_projects_table.sql**
    - Cria o ENUM `project_status_enum`
-   - Cria a tabela `projects` com FKs para users
+   - Cria a tabela `projects` com FKs para users (`advisor_id` é nullable —
+     a obrigatoriedade é validada no backend, não via constraint SQL)
    - Cria índices para student_id, advisor_id e status
 
 3. **003_create_deliveries_table.sql**
@@ -329,8 +348,18 @@ As migrations são executadas em ordem numérica:
    - Cria índices para delivery_id, advisor_id e created_at
 
 5. **005_create_notifications_table.sql**
-   - Cria a tabela `notifications` com FK para users
+   - Cria o ENUM `notification_type_enum` (`delivery_created`,
+     `feedback_registered`, `milestone_created`, `milestone_updated`)
+   - Cria a tabela `notifications` com FKs para users e, opcionalmente,
+     para projects
    - Cria índice parcial para notificações não lidas
+   - Cria trigger para atualização automática de `updated_at`
+
+6. **006_create_milestones_table.sql**
+   - Cria o ENUM `milestone_status_enum`
+   - Cria a tabela `milestones` com FK para projects
+   - Cria índices para project_id, status e due_date
+   - Cria trigger para atualização automática de `updated_at`
 
 ## Próximas Etapas do Projeto
 

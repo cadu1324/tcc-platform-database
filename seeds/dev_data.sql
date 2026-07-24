@@ -95,15 +95,30 @@ INSERT INTO feedbacks (delivery_id, advisor_id, comment, grade) VALUES
 (13, (SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'), 'Proposta inovadora! Desenvolver mais a parte técnica.', 8.0),
 (14, (SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'), 'Modelo de negócios bem estruturado.', 8.5);
 
+-- Marcos (milestones)
+INSERT INTO milestones (project_id, title, description, due_date, status) VALUES
+(1, 'Definição de Escopo e Requisitos', 'Levantamento e formalização dos requisitos do sistema', '2024-03-01 23:59:59-03', 'completed'),
+(1, 'Entrega da Revisão Bibliográfica', 'Consolidação do referencial teórico', '2024-04-30 23:59:59-03', 'completed'),
+(1, 'Apresentação de Progresso', 'Apresentação parcial do desenvolvimento para banca', '2024-09-15 23:59:59-03', 'pending'),
+(2, 'Validação do Protótipo com Usuários', 'Testes de usabilidade com estudantes voluntários', '2024-08-01 23:59:59-03', 'pending'),
+(2, 'Entrega Final do MVP', 'Versão mínima viável do aplicativo', '2024-12-01 23:59:59-03', 'pending'),
+(3, 'Defesa do TCC', 'Apresentação final para a banca avaliadora', '2023-11-25 23:59:59-03', 'completed'),
+(4, 'Definição da Arquitetura', 'Escolha de stack e desenho da arquitetura do chatbot', '2024-05-01 23:59:59-03', 'completed'),
+(4, 'Testes de Integração com LLM', 'Validação da integração com o modelo de linguagem', '2024-09-30 23:59:59-03', 'pending'),
+(5, 'Validação do Modelo de Negócios', 'Revisão do canvas com base em feedback do orientador', '2024-04-15 23:59:59-03', 'completed'),
+(5, 'Lançamento do MVP', 'Publicação da versão inicial do marketplace', '2024-08-15 23:59:59-03', 'pending');
+
 -- Notificações
-INSERT INTO notifications (user_id, message, is_read) VALUES
-((SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'), 'Sua entrega "Proposta Inicial" foi aprovada.', TRUE),
-((SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'), 'Sua entrega "Revisão Bibliográfica" foi aprovada.', TRUE),
-((SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'), 'Sua entrega "Protótipo de Interface" está em análise.', FALSE),
-((SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'), 'Lembrete: Entrega "Implementação Backend" vence em 30 dias.', FALSE),
-((SELECT id FROM users WHERE email = 'maria.souza@aluno.edu.br'), 'Sua entrega "Design do App" foi rejeitada.', FALSE),
-((SELECT id FROM users WHERE email = 'maria.souza@aluno.edu.br'), 'Nova entrega criada: "Design do App - Revisão".', FALSE),
-((SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'), 'João Pedro enviou "Protótipo de Interface" para avaliação.', FALSE),
-((SELECT id FROM users WHERE email = 'ana.santos@universidade.edu.br'), 'Lucas enviou "Arquitetura do Sistema" para avaliação.', FALSE),
-((SELECT id FROM users WHERE email = 'admin@tccplatform.com'), 'Novo usuário cadastrado: Gabriel Rodrigues.', TRUE),
-((SELECT id FROM users WHERE email = 'admin@tccplatform.com'), '5 projetos ativos no sistema.', TRUE);
+INSERT INTO notifications (user_id, type, message, project_id, is_read) VALUES
+((SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'), 'delivery_created', 'Novo envio: "Protótipo de Interface" foi enviado para avaliação no projeto "Sistema de Gestão de Biblioteca Digital".', 1, FALSE),
+((SELECT id FROM users WHERE email = 'ana.santos@universidade.edu.br'), 'delivery_created', 'Novo envio: "Arquitetura do Sistema" foi enviado para avaliação no projeto "Chatbot Educacional com IA Generativa".', 4, FALSE),
+((SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'), 'feedback_registered', 'Você recebeu um novo feedback na entrega "Proposta Inicial".', 1, TRUE),
+((SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'), 'feedback_registered', 'Você recebeu um novo feedback na entrega "Revisão Bibliográfica".', 1, TRUE),
+((SELECT id FROM users WHERE email = 'beatriz.almeida@aluno.edu.br'), 'feedback_registered', 'Você recebeu um novo feedback na entrega "Proposta de Projeto".', 5, TRUE),
+((SELECT id FROM users WHERE email = 'beatriz.almeida@aluno.edu.br'), 'feedback_registered', 'Você recebeu um novo feedback na entrega "Modelo de Negócios".', 5, FALSE),
+((SELECT id FROM users WHERE email = 'maria.souza@aluno.edu.br'), 'feedback_registered', 'Você recebeu um novo feedback na entrega "Proposta e Cronograma".', 2, TRUE),
+((SELECT id FROM users WHERE email = 'maria.souza@aluno.edu.br'), 'feedback_registered', 'Você recebeu um novo feedback na entrega "Design do App".', 2, FALSE),
+((SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'), 'milestone_created', 'Novo marco adicionado ao projeto "Sistema de Gestão de Biblioteca Digital": "Apresentação de Progresso".', 1, FALSE),
+((SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'), 'milestone_created', 'Novo marco adicionado ao projeto "Sistema de Gestão de Biblioteca Digital": "Apresentação de Progresso".', 1, FALSE),
+((SELECT id FROM users WHERE email = 'beatriz.almeida@aluno.edu.br'), 'milestone_updated', 'O marco "Validação do Modelo de Negócios" foi atualizado para "completed".', 5, TRUE),
+((SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'), 'milestone_updated', 'O marco "Validação do Modelo de Negócios" foi atualizado para "completed".', 5, FALSE);

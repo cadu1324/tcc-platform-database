@@ -14,7 +14,7 @@ CREATE TABLE projects (
     start_date DATE NOT NULL DEFAULT CURRENT_DATE,
     expected_delivery_date DATE,
     student_id INTEGER NOT NULL,
-    advisor_id INTEGER NOT NULL,
+    advisor_id INTEGER,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
