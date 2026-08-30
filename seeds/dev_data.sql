@@ -122,3 +122,30 @@ INSERT INTO notifications (user_id, type, message, project_id, is_read) VALUES
 ((SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'), 'milestone_created', 'Novo marco adicionado ao projeto "Sistema de Gestão de Biblioteca Digital": "Apresentação de Progresso".', 1, FALSE),
 ((SELECT id FROM users WHERE email = 'beatriz.almeida@aluno.edu.br'), 'milestone_updated', 'O marco "Validação do Modelo de Negócios" foi atualizado para "completed".', 5, TRUE),
 ((SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'), 'milestone_updated', 'O marco "Validação do Modelo de Negócios" foi atualizado para "completed".', 5, FALSE);
+
+-- Mensagens 1:1 (João Pedro Oliveira <-> Prof. Dr. Carlos Silva, projeto "Sistema de Gestão de Biblioteca Digital")
+INSERT INTO messages (sender_id, recipient_id, content, is_read) VALUES
+(
+    (SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'),
+    (SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'),
+    'Professor, enviei o protótipo de interface. Poderia revisar quando possível?',
+    TRUE
+),
+(
+    (SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'),
+    (SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'),
+    'Recebi, João. Vou analisar até quinta e trago comentários na nossa reunião.',
+    TRUE
+),
+(
+    (SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'),
+    (SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'),
+    'Perfeito, obrigado! Já comecei a implementação do backend em paralelo.',
+    FALSE
+),
+(
+    (SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'),
+    (SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'),
+    'Ótimo. Lembre-se de documentar a API REST desde já para facilitar a próxima entrega.',
+    FALSE
+);
