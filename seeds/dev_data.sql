@@ -5,16 +5,16 @@ SET timezone = 'America/Sao_Paulo';
 
 -- Usuários
 INSERT INTO users (name, email, password_hash, user_type, is_active) VALUES
-('Admin Sistema', 'admin@tccplatform.com', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'admin', TRUE),
-('Admin Backup', 'admin.backup@tccplatform.com', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'admin', TRUE),
-('Prof. Dr. Carlos Silva', 'carlos.silva@universidade.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'advisor', TRUE),
-('Profa. Dra. Ana Santos', 'ana.santos@universidade.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'advisor', TRUE),
-('Prof. Me. Roberto Lima', 'roberto.lima@universidade.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'advisor', TRUE),
-('João Pedro Oliveira', 'joao.oliveira@aluno.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'student', TRUE),
-('Maria Clara Souza', 'maria.souza@aluno.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'student', TRUE),
-('Lucas Fernandes Costa', 'lucas.costa@aluno.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'student', TRUE),
-('Beatriz Almeida', 'beatriz.almeida@aluno.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'student', TRUE),
-('Gabriel Rodrigues', 'gabriel.rodrigues@aluno.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'student', TRUE);
+('Admin Sistema', 'admin@tccplatform.com', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'admin', TRUE),
+('Admin Backup', 'admin.backup@tccplatform.com', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'admin', TRUE),
+('Prof. Dr. Carlos Silva', 'carlos.silva@universidade.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'advisor', TRUE),
+('Profa. Dra. Ana Santos', 'ana.santos@universidade.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'advisor', TRUE),
+('Prof. Me. Roberto Lima', 'roberto.lima@universidade.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'advisor', TRUE),
+('João Pedro Oliveira', 'joao.oliveira@aluno.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'student', TRUE),
+('Maria Clara Souza', 'maria.souza@aluno.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'student', TRUE),
+('Lucas Fernandes Costa', 'lucas.costa@aluno.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'student', TRUE),
+('Beatriz Almeida', 'beatriz.almeida@aluno.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'student', TRUE),
+('Gabriel Rodrigues', 'gabriel.rodrigues@aluno.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'student', TRUE);
 
 -- Projetos
 INSERT INTO projects (title, description, status, start_date, expected_delivery_date, student_id, advisor_id) VALUES
