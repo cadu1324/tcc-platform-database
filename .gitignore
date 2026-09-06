@@ -28,3 +28,6 @@ temp/
 
 *.pem
 *.key
+
+# Node (migration runner)
+node_modules/

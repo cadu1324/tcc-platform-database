@@ -1,0 +1,15 @@
+{
+  "name": "tcc-platform-database",
+  "version": "1.0.0",
+  "description": "Migrations e seeds do banco PostgreSQL da TCC Platform",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "migrate": "node scripts/migrate.js",
+    "migrate:reset": "node scripts/migrate.js --reset",
+    "migrate:schema": "node scripts/migrate.js --no-seed"
+  },
+  "dependencies": {
+    "pg": "^8.12.0"
+  }
+}

@@ -5,16 +5,16 @@ SET timezone = 'America/Sao_Paulo';
 
 -- Usuários
 INSERT INTO users (name, email, password_hash, user_type, is_active) VALUES
-('Admin Sistema', 'admin@tccplatform.com', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'admin', TRUE),
-('Admin Backup', 'admin.backup@tccplatform.com', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'admin', TRUE),
-('Prof. Dr. Carlos Silva', 'carlos.silva@universidade.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'advisor', TRUE),
-('Profa. Dra. Ana Santos', 'ana.santos@universidade.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'advisor', TRUE),
-('Prof. Me. Roberto Lima', 'roberto.lima@universidade.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'advisor', TRUE),
-('João Pedro Oliveira', 'joao.oliveira@aluno.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'student', TRUE),
-('Maria Clara Souza', 'maria.souza@aluno.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'student', TRUE),
-('Lucas Fernandes Costa', 'lucas.costa@aluno.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'student', TRUE),
-('Beatriz Almeida', 'beatriz.almeida@aluno.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'student', TRUE),
-('Gabriel Rodrigues', 'gabriel.rodrigues@aluno.edu.br', '$2b$10$rQZ8K.Nh5yJvH3WZpMqKqeOxBxBqVnHxJvPqRmJ5qZxMqN8qZ8K.K', 'student', TRUE);
+('Admin Sistema', 'admin@tccplatform.com', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'admin', TRUE),
+('Admin Backup', 'admin.backup@tccplatform.com', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'admin', TRUE),
+('Prof. Dr. Carlos Silva', 'carlos.silva@universidade.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'advisor', TRUE),
+('Profa. Dra. Ana Santos', 'ana.santos@universidade.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'advisor', TRUE),
+('Prof. Me. Roberto Lima', 'roberto.lima@universidade.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'advisor', TRUE),
+('João Pedro Oliveira', 'joao.oliveira@aluno.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'student', TRUE),
+('Maria Clara Souza', 'maria.souza@aluno.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'student', TRUE),
+('Lucas Fernandes Costa', 'lucas.costa@aluno.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'student', TRUE),
+('Beatriz Almeida', 'beatriz.almeida@aluno.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'student', TRUE),
+('Gabriel Rodrigues', 'gabriel.rodrigues@aluno.edu.br', '$2b$10$/DwoGtIgZAVtlcvQKZIb2.0DpnIzEYfXdRCeKV4XDPyRGfDPe5Erm', 'student', TRUE);
 
 -- Projetos
 INSERT INTO projects (title, description, status, start_date, expected_delivery_date, student_id, advisor_id) VALUES
@@ -122,3 +122,30 @@ INSERT INTO notifications (user_id, type, message, project_id, is_read) VALUES
 ((SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'), 'milestone_created', 'Novo marco adicionado ao projeto "Sistema de Gestão de Biblioteca Digital": "Apresentação de Progresso".', 1, FALSE),
 ((SELECT id FROM users WHERE email = 'beatriz.almeida@aluno.edu.br'), 'milestone_updated', 'O marco "Validação do Modelo de Negócios" foi atualizado para "completed".', 5, TRUE),
 ((SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'), 'milestone_updated', 'O marco "Validação do Modelo de Negócios" foi atualizado para "completed".', 5, FALSE);
+
+-- Mensagens 1:1 (João Pedro Oliveira <-> Prof. Dr. Carlos Silva, projeto "Sistema de Gestão de Biblioteca Digital")
+INSERT INTO messages (sender_id, recipient_id, content, is_read) VALUES
+(
+    (SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'),
+    (SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'),
+    'Professor, enviei o protótipo de interface. Poderia revisar quando possível?',
+    TRUE
+),
+(
+    (SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'),
+    (SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'),
+    'Recebi, João. Vou analisar até quinta e trago comentários na nossa reunião.',
+    TRUE
+),
+(
+    (SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'),
+    (SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'),
+    'Perfeito, obrigado! Já comecei a implementação do backend em paralelo.',
+    FALSE
+),
+(
+    (SELECT id FROM users WHERE email = 'carlos.silva@universidade.edu.br'),
+    (SELECT id FROM users WHERE email = 'joao.oliveira@aluno.edu.br'),
+    'Ótimo. Lembre-se de documentar a API REST desde já para facilitar a próxima entrega.',
+    FALSE
+);
