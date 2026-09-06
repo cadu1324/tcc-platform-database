@@ -30,7 +30,8 @@ tcc-platform-database/
 │   ├── 006_create_milestones_table.sql
 │   ├── 007_create_messages_table.sql
 │   ├── 008_create_delivery_files_table.sql
-│   └── 009_create_password_reset_tokens_table.sql
+│   ├── 009_create_password_reset_tokens_table.sql
+│   └── 010_add_message_received_notification_type.sql
 └── seeds/                  # Dados de desenvolvimento
     └── dev_data.sql
 ```
@@ -216,7 +217,7 @@ Notificações/alertas para os usuários.
 |--------|------|-----------|
 | id | SERIAL | Identificador único |
 | user_id | INTEGER | Referência ao usuário (FK) |
-| type | ENUM | Tipo: `delivery_created`, `feedback_registered`, `milestone_created`, `milestone_updated` |
+| type | ENUM | Tipo: `delivery_created`, `feedback_registered`, `milestone_created`, `milestone_updated`, `message_received` |
 | message | TEXT | Mensagem da notificação |
 | project_id | INTEGER | Referência ao projeto (FK, opcional) |
 | is_read | BOOLEAN | Flag de leitura |
@@ -450,6 +451,13 @@ As migrations são executadas em ordem numérica:
      (`used_at`) são aplicados na camada de serviço do backend
    - Índices para `user_id` (invalidar tokens anteriores) e `expires_at`
      (rotina de limpeza)
+
+10. **010_add_message_received_notification_type.sql**
+    - Adiciona o valor `message_received` ao ENUM `notification_type_enum`
+      (`ADD VALUE IF NOT EXISTS`, re-executável)
+    - Habilita o aviso de "mensagem nova" no sino; emitido pelo backend após
+      persistir a mensagem 1:1 da migration 007 (best-effort, com coalescing
+      por não lidas)
 
 ## Próximas Etapas do Projeto
 
