@@ -27,7 +27,10 @@ tcc-platform-database/
 │   ├── 003_create_deliveries_table.sql
 │   ├── 004_create_feedbacks_table.sql
 │   ├── 005_create_notifications_table.sql
-│   └── 006_create_milestones_table.sql
+│   ├── 006_create_milestones_table.sql
+│   ├── 007_create_messages_table.sql
+│   ├── 008_create_delivery_files_table.sql
+│   └── 009_create_password_reset_tokens_table.sql
 └── seeds/                  # Dados de desenvolvimento
     └── dev_data.sql
 ```
@@ -47,10 +50,11 @@ tcc-platform-database/
 │ user_type       │       │ start_date      │       │ deadline        │
 │ is_active       │       │ expected_date   │       │ status          │
 │ created_at      │       │ student_id (FK) │       │ file_url        │
-│ updated_at      │       │ advisor_id (FK) │       │ submitted_at    │
-└─────────────────┘       │ created_at      │       │ created_at      │
-                           │ updated_at      │       │ updated_at      │
-                           └─────────────────┘       └─────────────────┘
+│ updated_at      │       │ advisor_id (FK) │       │ file_name       │
+└─────────────────┘       │ created_at      │       │ submitted_at    │
+                           │ updated_at      │       │ created_at      │
+                           └─────────────────┘       │ updated_at      │
+                                                     └─────────────────┘
 
 ┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
 │   FEEDBACKS     │       │   MILESTONES    │       │  NOTIFICATIONS  │
@@ -64,6 +68,19 @@ tcc-platform-database/
 └─────────────────┘       │ created_at      │       │ created_at      │
                            │ updated_at      │       │ updated_at      │
                            └─────────────────┘       └─────────────────┘
+
+┌──────────────────┐      ┌─────────────────┐      ┌────────────────────────┐
+│  DELIVERY_FILES  │      │    MESSAGES     │      │ PASSWORD_RESET_TOKENS   │
+├──────────────────┤      ├─────────────────┤      ├────────────────────────┤
+│ id (PK)          │      │ id (PK)         │      │ id (PK)                 │
+│ delivery_id (FK) │      │ sender_id (FK)  │      │ user_id (FK)            │
+│ file_name        │      │ recipient_id(FK)│      │ token_hash (UNIQUE)     │
+│ mime_type        │      │ content         │      │ expires_at              │
+│ size_bytes       │      │ is_read         │      │ used_at                 │
+│ content (BYTEA)  │      │ created_at      │      │ created_at              │
+│ created_at       │      └─────────────────┘      └────────────────────────┘
+│ updated_at       │
+└──────────────────┘
 ```
 
 **Relacionamentos (FKs):**
@@ -71,11 +88,15 @@ tcc-platform-database/
 - `projects.student_id` → `users.id`
 - `projects.advisor_id` → `users.id` (opcional)
 - `deliveries.project_id` → `projects.id`
+- `delivery_files.delivery_id` → `deliveries.id` (1:1, `ON DELETE CASCADE`)
 - `feedbacks.delivery_id` → `deliveries.id`
 - `feedbacks.advisor_id` → `users.id`
 - `milestones.project_id` → `projects.id`
 - `notifications.user_id` → `users.id`
 - `notifications.project_id` → `projects.id` (opcional)
+- `messages.sender_id` → `users.id`
+- `messages.recipient_id` → `users.id`
+- `password_reset_tokens.user_id` → `users.id` (`ON DELETE CASCADE`)
 
 ### Tabelas
 
@@ -125,10 +146,56 @@ Entregas/marcos do projeto.
 | description | TEXT | Descrição do que deve ser entregue |
 | deadline | TIMESTAMPTZ | Prazo de entrega |
 | status | ENUM | Status: `pending`, `submitted`, `approved`, `rejected` |
-| file_url | VARCHAR(1000) | URL do arquivo enviado |
+| file_url | VARCHAR(1000) | URL de download do arquivo enviado |
+| file_name | VARCHAR(255) | Nome do arquivo enviado (denormalizado de `delivery_files`) |
 | submitted_at | TIMESTAMPTZ | Data de submissão |
 | created_at | TIMESTAMPTZ | Data de criação |
 | updated_at | TIMESTAMPTZ | Data de atualização |
+
+#### delivery_files
+Conteúdo binário do arquivo de cada entrega, armazenado no próprio Postgres (`BYTEA`).
+
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | SERIAL | Identificador único |
+| delivery_id | INTEGER | Referência à entrega (FK, **UNIQUE** → 1 arquivo por entrega) |
+| file_name | VARCHAR(255) | Nome original do arquivo |
+| mime_type | VARCHAR(100) | Content-Type do arquivo (ex.: `application/pdf`) |
+| size_bytes | INTEGER | Tamanho em bytes (CHECK `> 0`) |
+| content | BYTEA | Conteúdo binário do arquivo |
+| created_at | TIMESTAMPTZ | Data de criação |
+| updated_at | TIMESTAMPTZ | Data de atualização |
+
+> Relação **1:1** com `deliveries` via `delivery_id UNIQUE`. O reenvio de uma
+> entrega faz **UPSERT** nesta tabela (não cria linha nova). `ON DELETE CASCADE`:
+> apagar a entrega apaga o arquivo. O limite de 20 MB é aplicado no backend
+> (multer), não via constraint SQL.
+
+#### messages
+Mensagens diretas 1:1 entre aluno e orientador.
+
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | SERIAL | Identificador único |
+| sender_id | INTEGER | Autor da mensagem (FK → users) |
+| recipient_id | INTEGER | Destinatário da mensagem (FK → users) |
+| content | TEXT | Corpo da mensagem |
+| is_read | BOOLEAN | Flag de leitura |
+| created_at | TIMESTAMPTZ | Data de envio |
+
+#### password_reset_tokens
+Tokens do fluxo "esqueci minha senha". Guarda só o **hash** do token; o valor cru vai apenas no link do e-mail (`${FRONTEND_URL}/reset-password?token=<token-cru>`).
+
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | SERIAL | Identificador único |
+| user_id | INTEGER | Referência ao usuário (FK → users, `ON DELETE CASCADE`) |
+| token_hash | VARCHAR(255) | Hash do token de reset (**UNIQUE**) |
+| expires_at | TIMESTAMPTZ | Instante de expiração (janela de ~1h definida no backend) |
+| used_at | TIMESTAMPTZ | Quando o token foi consumido (`NULL` = ainda válido) |
+| created_at | TIMESTAMPTZ | Data de criação |
+
+> **Uso único:** o reset marca `used_at` e a validação exige `used_at IS NULL AND expires_at > now()`. Ao gerar um novo token, o backend invalida os anteriores do mesmo `user_id`. Sem `updated_at`/trigger (linha praticamente imutável, igual a `feedbacks`).
 
 #### feedbacks
 Avaliações dos orientadores sobre as entregas.
@@ -360,6 +427,29 @@ As migrations são executadas em ordem numérica:
    - Cria a tabela `milestones` com FK para projects
    - Cria índices para project_id, status e due_date
    - Cria trigger para atualização automática de `updated_at`
+
+7. **007_create_messages_table.sql**
+   - Cria a tabela `messages` (mensageria 1:1) com FKs para users
+     (`sender_id`, `recipient_id`)
+   - Cria índices para contagem de não lidas por destinatário e para
+     carregamento da conversa entre dois usuários em ordem cronológica
+
+8. **008_create_delivery_files_table.sql**
+   - Adiciona a coluna `file_name` em `deliveries` (denormalizada, com
+     `ADD COLUMN IF NOT EXISTS`)
+   - Cria a tabela `delivery_files` com o binário da entrega (`BYTEA`),
+     FK para deliveries e `delivery_id UNIQUE` (relação 1:1, reenvio via UPSERT)
+   - `ON DELETE CASCADE`: apagar a entrega apaga o arquivo
+   - Reaproveita a função `update_updated_at_column()` da migration 001 no
+     trigger de `updated_at`
+
+9. **009_create_password_reset_tokens_table.sql**
+   - Cria a tabela `password_reset_tokens` com FK para users
+     (`ON DELETE CASCADE`) e `token_hash UNIQUE`
+   - Guarda apenas o hash do token; expiração (`expires_at`) e uso único
+     (`used_at`) são aplicados na camada de serviço do backend
+   - Índices para `user_id` (invalidar tokens anteriores) e `expires_at`
+     (rotina de limpeza)
 
 ## Próximas Etapas do Projeto
 
