@@ -31,13 +31,7 @@ tcc-platform-database/
 │   ├── 007_create_messages_table.sql
 │   ├── 008_create_delivery_files_table.sql
 │   ├── 009_create_password_reset_tokens_table.sql
-│   ├── 010_add_message_received_notification_type.sql
-│   ├── 011_create_refresh_tokens_table.sql
-│   ├── 012_create_notification_settings_table.sql
-│   ├── 013_add_delivery_file_versioning.sql
-│   ├── 014_add_milestone_notification_types.sql
-│   ├── 015_add_project_knowledge_area.sql
-│   └── 016_add_delivery_milestone_link.sql
+│   └── 010_add_message_received_notification_type.sql
 └── seeds/                  # Dados de desenvolvimento
     └── dev_data.sql
 ```
@@ -99,10 +93,7 @@ tcc-platform-database/
 - `projects.student_id` → `users.id`
 - `projects.advisor_id` → `users.id` (opcional)
 - `deliveries.project_id` → `projects.id`
-- `deliveries.milestone_id` → `milestones.id` (opcional, `ON DELETE SET NULL`,
-  migration 016)
-- `delivery_files.delivery_id` → `deliveries.id` (1:N desde a migration 013 —
-  histórico de versões, `ON DELETE CASCADE`)
+- `delivery_files.delivery_id` → `deliveries.id` (1:1, `ON DELETE CASCADE`)
 - `feedbacks.delivery_id` → `deliveries.id`
 - `feedbacks.advisor_id` → `users.id`
 - `milestones.project_id` → `projects.id`
@@ -111,7 +102,6 @@ tcc-platform-database/
 - `messages.sender_id` → `users.id`
 - `messages.recipient_id` → `users.id`
 - `password_reset_tokens.user_id` → `users.id` (`ON DELETE CASCADE`)
-- `refresh_tokens.user_id` → `users.id` (`ON DELETE CASCADE`, migration 011)
 
 ### Tabelas
 
@@ -472,66 +462,6 @@ As migrations são executadas em ordem numérica:
     - Habilita o aviso de "mensagem nova" no sino; emitido pelo backend após
       persistir a mensagem 1:1 da migration 007 (best-effort, com coalescing
       por não lidas)
-
-11. **011_create_refresh_tokens_table.sql**
-    - Cria a tabela `refresh_tokens` com FK para users (`ON DELETE CASCADE`)
-      e `token_hash UNIQUE`
-    - Suporta o fluxo JWT access (15 min) + refresh (7 dias); guarda apenas o
-      hash (SHA-256), mesmo padrão de `password_reset_tokens`
-    - Rotação: cada uso marca `revoked_at` e emite um par novo
-    - Índices para `user_id` (revogação geral) e `expires_at` (limpeza)
-
-12. **012_create_notification_settings_table.sql**
-    - Cria a tabela `notification_settings` — configuração **global** de
-      notificações controlada pelo admin (US15), não por usuário
-    - Tabela singleton: uma única linha (`id SMALLINT PRIMARY KEY DEFAULT 1`),
-      garantida pela `CHECK (id = 1)`
-    - `CHECK` também valida `email_digest_frequency IN ('daily', 'weekly')`
-    - Semeia a linha única com os defaults na própria migration (o backend
-      depende dela existir em qualquer ambiente)
-
-13. **013_add_delivery_file_versioning.sql**
-    - Remove a `UNIQUE(delivery_id)` de `delivery_files` (que fazia o reenvio
-      sobrescrever o arquivo anterior via UPSERT, ver migration 008)
-    - Adiciona `version INTEGER NOT NULL DEFAULT 1`; cada submissão nova vira
-      uma linha adicional (versão incremental calculada no backend)
-    - `UNIQUE(delivery_id, version)` substitui a constraint antiga; índice
-      explícito em `delivery_id` (a UNIQUE antiga cobria essa busca)
-
-14. **014_add_milestone_notification_types.sql**
-    - Adiciona `milestone_due_soon` e `milestone_overdue` ao ENUM
-      `notification_type_enum` (mesmo padrão re-executável da 010)
-    - Suporta a checagem diária de marcos perto do prazo/atrasados (US14)
-
-15. **015_add_project_knowledge_area.sql**
-    - Adiciona `knowledge_area VARCHAR(150)` (nullable) em `projects`
-    - Projetos antigos ficam sem valor; obrigatoriedade para projetos novos é
-      validada no backend, não via constraint
-
-16. **016_add_delivery_milestone_link.sql**
-    - Adiciona `milestone_id INTEGER` (nullable) em `deliveries`, com FK para
-      `milestones` (`ON DELETE SET NULL`)
-    - Entregas antigas ficam sem marco vinculado; exigir o vínculo ao criar
-      uma entrega nova (e validar que o marco é do mesmo projeto) é regra de
-      negócio no backend, não constraint SQL
-    - Índice explícito em `milestone_id` (Postgres não cria índice de FK
-      automaticamente)
-
-### Migrations 011-016 em diante: Prisma Migrate
-
-O backend (`tcc-platform-backend`) passou a usar **Prisma ORM** para acesso a
-dados. A partir da migration 016, o schema deste banco foi "baselineado" no
-Prisma Migrate: `tcc-platform-backend/prisma/migrations/0_baseline` reflete
-exatamente o estado produzido pelas migrations 001-016 acima (introspectado
-direto do banco em produção), incluindo o que o `schema.prisma` não modela
-sozinho (as 4 `CHECK` constraints e as triggers de `updated_at`).
-
-**Daqui em diante, mudanças de schema são feitas no backend** (editar
-`prisma/schema.prisma` + `npm run migrate:dev`), não mais como arquivos SQL
-neste repositório. As migrations 001-016 continuam aqui como registro
-histórico de como o schema foi construído, e o `scripts/migrate.js` deste
-repositório continua útil para provisionar um banco novo do zero (dev local,
-ambiente novo) — mas não para evoluir um banco que já existe.
 
 ## Próximas Etapas do Projeto
 
