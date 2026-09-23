@@ -36,6 +36,10 @@ tcc-platform-database/
     └── dev_data.sql
 ```
 
+> **A partir da 016, este diretório é histórico.** Novas mudanças de schema
+> passam a ser feitas via Prisma Migrate, em `tcc-platform-backend/prisma/migrations`
+> (veja "Migrations 011-016 em diante" mais abaixo).
+
 ## Modelo de Dados
 
 ### Diagrama ER (Entidade-Relacionamento)
